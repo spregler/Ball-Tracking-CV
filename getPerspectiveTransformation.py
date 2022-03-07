@@ -62,7 +62,7 @@ def getPerspectiveTransformation(src, dst):
     return h.reshape(3, 3)
 
 
-def harris(img, threshold=0.79):
+def harris(img, threshold=0.76):
     # Sobel x-axis kernel
     SOBEL_X = np.array((
         [-1, 0, 1],
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     # There are more than four corners detected, we must remove corners that are being detected twice
     elif (len(sup[0]) > 4):
         for i in range(len(sup[0]) - 1):
-            if ( (sup[0][i+1] - sup[0][i] <= 1) & (sup[1][i+1] - sup[1][i] <= 1) ):
+            if ( (abs(sup[0][i+1] - sup[0][i]) <= 1) and (abs(sup[1][i+1] - sup[1][i]) <= 1) ):
                 print("detected same point")
             else: # ( (sup[0][i+1] - sup[0][i]) > 1 or (sup[1][i+1] - sup[1][i]) > 1 ):
                 pts.append([sup[1][i], sup[0][i]])
@@ -175,11 +175,13 @@ if __name__ == "__main__":
 
     while True:
         _, frame = cap.read()
+        # (height, width)
+        frame_crop = frame[35:440, 150:580]
 
-        pts2 = np.float32([[0, 0], [400, 0], [0, 400], [400, 400]])
+        pts2 = np.float32([[0, 0], [700, 0], [0, 700], [700, 700]])
         matrix = getPerspectiveTransformation(pts1, pts2)
 
-        result = cv.warpPerspective(frame, matrix, (400, 400) )
+        result = cv.warpPerspective(frame_crop, matrix, (700, 700) )
         cv.imshow("Perspective Transformation", result)
 
         key = cv.waitKey(1)
